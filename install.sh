@@ -216,8 +216,27 @@ else
         echo "Sudo required to install service! Skipping."
     else
 
+	echo "Setting up avahi-daemon to resolve hostname as IP."
 	sudo apt update && sudo apt-get install -y avahi-daemon
  	sudo systemctl enable --now avahi-daemon
+
+	# TODO: check if NetworkManager is installed and set it as the main thing then do this.
+	echo "Adding NetworkManager connection to host access point."
+	sudo nmcli connection add \
+  		type wifi \
+  		con-name fallback-ap \
+  		ifname wlan0 \
+  		autoconnect yes \
+  		802-11-wireless.mode ap \
+  		802-11-wireless.ssid LightBoard \
+  		802-11-wireless.band bg \
+  		wifi-sec.key-mgmt wpa-psk \
+  		wifi-sec.psk "password" \
+  		ipv4.method shared \
+  		ipv4.addresses 10.0.0.1/24 \
+  		ipv4.gateway 10.0.0.1 \
+  		ipv6.method ignore \
+  		connection.autoconnect-priority 0
 
 
 	SERVICE="mlb-led-board-web-interface.service"
