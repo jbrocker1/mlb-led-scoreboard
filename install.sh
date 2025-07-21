@@ -220,24 +220,27 @@ else
 	sudo apt-get install -y avahi-daemon
  	sudo systemctl enable --now avahi-daemon
 
-	# TODO: check if NetworkManager is installed and set it as the main thing then do this.
-	echo "Adding NetworkManager connection to host access point."
-	sudo nmcli connection add \
-  		type wifi \
-  		con-name fallback-ap \
-  		ifname wlan0 \
-  		autoconnect yes \
-  		802-11-wireless.mode ap \
-  		802-11-wireless.ssid LightBoard \
-  		802-11-wireless.band bg \
-  		wifi-sec.key-mgmt wpa-psk \
-  		wifi-sec.psk "password" \
-  		ipv4.method shared \
-  		ipv4.addresses 10.0.0.1/24 \
-  		ipv4.gateway 10.0.0.1 \
-  		ipv6.method ignore \
-  		connection.autoconnect-priority 0
-
+	if nmcli connection show fallback-ap > /dev/null 2>&1; then
+		echo "Connection 'fallback-ap' already exists! Not making a new one!"
+	else
+		# TODO: check if NetworkManager is installed and set it as the main thing then do this.
+		echo "Adding NetworkManager connection to host access point."
+		sudo nmcli connection add \
+  			type wifi \
+  			con-name fallback-ap \
+  			ifname wlan0 \
+  			autoconnect yes \
+  			802-11-wireless.mode ap \
+  			802-11-wireless.ssid LightBoard \
+  			802-11-wireless.band bg \
+  			wifi-sec.key-mgmt wpa-psk \
+  			wifi-sec.psk "password" \
+  			ipv4.method shared \
+  			ipv4.addresses 10.0.0.1/24 \
+  			ipv4.gateway 10.0.0.1 \
+  			ipv6.method ignore \
+  			connection.autoconnect-priority 0
+	fi
 
 	SERVICE="mlb-led-board-web-interface.service"
 	UNIT_DIR="/etc/systemd/system"
@@ -256,8 +259,10 @@ Wants=network-online.target time-sync.target
 After=network.target network-online.target time-sync.target
 
 [Service]
+Type=oneshot
 WorkingDirectory=$PWD/ws-server
 ExecStart=$PWD/ws-server/start_webserver.sh
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
