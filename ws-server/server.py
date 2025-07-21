@@ -1,0 +1,56 @@
+import asyncio, json, subprocess
+import websockets
+
+WS_HOST = '0.0.0.0'
+WS_PORT = 6789
+
+async def handler(ws):
+    async for raw in ws:
+        try:
+            msg = json.loads(raw)
+        except json.JSONDecodeError:
+            await ws.send(json.dumps({"error":"bad_json"}))
+            continue
+
+        t = msg.get("type")
+        if t == "list_networks":
+            # scan SSIDs
+            try:
+                raw = subprocess.check_output(
+                    ['nmcli', '-t', '-f', 'SSID', 'dev', 'wifi'],
+                    stderr=subprocess.DEVNULL,
+                    encoding='utf-8'
+                )
+                ssids = [s for s in raw.splitlines() if s.strip()]
+            except Exception:
+                ssids = []
+            await ws.send(json.dumps({
+                "type": "networks",
+                "ssids": ssids
+            }))
+
+        elif t == "connect":
+            ssid     = msg.get("ssid")
+            password = msg.get("password")
+            proc = subprocess.run(
+                ['nmcli', 'dev', 'wifi', 'connect', ssid, 'password', password],
+                capture_output=True, text=True
+            )
+            resp = {
+                "type":   "connect_result",
+                "status": "success" if proc.returncode==0 else "error",
+                "output": proc.stdout if proc.returncode==0 else proc.stderr
+            }
+            await ws.send(json.dumps(resp))
+
+        else:
+            await ws.send(json.dumps({"error":"unknown_type","received":t}))
+
+async def main():
+    async with websockets.serve(handler, WS_HOST, WS_PORT):
+        print(f"WS on ws://{WS_HOST}:{WS_PORT}")
+        await asyncio.Future()
+
+if __name__ == '__main__':
+    asyncio.run(main())
+

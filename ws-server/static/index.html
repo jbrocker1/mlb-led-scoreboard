@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Wi-Fi Selector</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; }
+    #wifi-list button { margin: 0.25rem; }
+    #password-prompt { margin-top: 1rem; }
+    #log { margin-top: 1rem; background: #f6f6f6; padding: 0.5rem; height: 6em; overflow: auto; }
+  </style>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <h1>Select a Wi-Fi Network</h1>
+
+  <!-- SSID buttons go here -->
+  <div id="wifi-list"></div>
+
+  <!-- Password prompt (hidden until you click an SSID) -->
+  <div id="password-prompt" style="display:none;">
+    <h2 id="selected-ssid"></h2>
+    <input id="password" type="password" placeholder="Enter password" />
+    <button id="connect-btn">Connect</button>
+  </div>
+
+  <!-- Log for debug / server replies -->
+  <pre id="log"></pre>
+</body>
+</html>

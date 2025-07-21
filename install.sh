@@ -3,13 +3,17 @@
 # Redirect output to a logfile
 exec > >(tee -a logs/mlbled.log) 2>&1
 
-SKIP_PYTHON=false
-SKIP_CONFIG=false
-SKIP_MATRIX=false
+SKIP_PYTHON=true
+SKIP_CONFIG=true
+SKIP_MATRIX=true
 NO_SUDO=false
 SKIP_VENV=false
 DRIVER_SHA=master
 FORCE=false
+
+# TODO: add args for this
+WEB_INTERFACE=true
+CREATE_SERVICE=false
 
 usage() {
     cat <<USAGE
@@ -200,6 +204,147 @@ if [ "$SKIP_MATRIX" = false ]; then
         fi
     fi
 fi
+
+if [ "$WEB_INTERFACE" = false ]; then
+    echo
+    echo "------------------------------------"
+    echo "  Skipping web interface setup."
+    echo "------------------------------------"
+    echo
+else
+    if [ "NO_SUDO" = true ]; then
+        echo "Sudo required to install service! Skipping."
+    else
+
+	SERVICE="mlb-led-board-web-interface.service"
+	UNIT_DIR="/etc/systemd/system"
+	UNIT_FILE="$UNIT_DIR/$SERVICE"
+	OVERRIDE_DIR="$UNIT_DIR/${SERVICE%.service}.d"
+	OVERRIDE_FILE="$OVERRIDE_DIR/override.conf"
+
+	# 1) Detect whether the unit already exists
+	if ! systemctl list-unit-files --no-legend | awk '{print $1}' | grep -xq "$SERVICE"; then
+	  echo "Service $SERVICE not found—creating main unit file..."
+
+	  cat > "$UNIT_FILE" <<EOF
+[Unit]
+Description=MLB LED Scoreboard Web Interface
+Wants=network-online.target time-sync.target
+After=network.target network-online.target time-sync.target
+
+[Service]
+WorkingDirectory=$PWD/ws-server
+ExecStart=$PWD/ws-server/start_webserver.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+	  # Make sure it’s readable
+	  chmod 644 "$UNIT_FILE"
+
+	  # Enable it so it auto-starts on boot
+	  systemctl enable "$SERVICE"
+	else
+	  echo "Service $SERVICE already exists—skipping main unit creation."
+	fi
+
+	# 2) Create/update a drop-in override
+	echo "Writing override to $OVERRIDE_FILE..."
+	mkdir -p "$OVERRIDE_DIR"
+	cat > "$OVERRIDE_FILE" <<EOF
+[Service]
+# Add or override any settings here
+EOF
+	chmod 644 "$OVERRIDE_FILE"
+
+	# 3) Reload daemon and restart the service
+	echo "Reloading systemd daemon..."
+	sudo systemctl daemon-reload
+
+	echo "Restarting $SERVICE..."
+	sudo systemctl restart "$SERVICE"
+
+	echo "Done."
+    fi
+
+
+
+
+
+fi
+
+
+if [ "$CREATE_SERVICE" = false ]; then
+    echo
+    echo "-----------------------------"
+    echo "  Skipping service creation."
+    echo "-----------------------------"
+    echo
+else
+
+    if [ "NO_SUDO" = true ]; then
+        echo "Sudo required to install service! Skipping."
+    else
+
+	SERVICE="mlb-led-board.service"
+	UNIT_DIR="/etc/systemd/system"
+	UNIT_FILE="$UNIT_DIR/$SERVICE"
+	OVERRIDE_DIR="$UNIT_DIR/${SERVICE%.service}.d"
+	OVERRIDE_FILE="$OVERRIDE_DIR/override.conf"
+
+	# 1) Detect whether the unit already exists
+	if ! systemctl list-unit-files --no-legend | awk '{print $1}' | grep -xq "$SERVICE"; then
+	  echo "Service $SERVICE not found—creating main unit file..."
+
+	  cat > "$UNIT_FILE" <<EOF
+[Unit]
+Description=MLB LED Scoreboard
+Wants=network-online.target time-sync.target
+After=network.target network-online.target time-sync.target
+ExecStartPre=/bin/sleep/15
+
+[Service]
+Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gio-mapping=adafruit-hat"
+WorkingDirectory=$PWD
+ExecStart=$PWD/main.py \$SCOREBOARD_ARGS
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+	  # Make sure it’s readable
+	  chmod 644 "$UNIT_FILE"
+
+	  # Enable it so it auto-starts on boot
+	  systemctl enable "$SERVICE"
+	else
+	  echo "Service $SERVICE already exists—skipping main unit creation."
+	fi
+
+	# 2) Create/update a drop-in override
+	echo "Writing override to $OVERRIDE_FILE..."
+	mkdir -p "$OVERRIDE_DIR"
+	cat > "$OVERRIDE_FILE" <<EOF
+[Service]
+# Add or override any settings here
+# Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gio-mapping=adafruit-hat"
+EOF
+	chmod 644 "$OVERRIDE_FILE"
+
+	# 3) Reload daemon and restart the service
+	echo "Reloading systemd daemon..."
+	sudo systemctl daemon-reload
+
+	echo "Restarting $SERVICE..."
+	sudo systemctl restart "$SERVICE"
+
+	echo "Done."
+    fi
+fi
+
 
 if [ "$SKIP_CONFIG" = true ]; then
     echo
