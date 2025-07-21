@@ -13,7 +13,7 @@ FORCE=false
 
 # TODO: add args for this
 WEB_INTERFACE=true
-CREATE_SERVICE=false
+CREATE_SERVICE=true
 
 usage() {
     cat <<USAGE
