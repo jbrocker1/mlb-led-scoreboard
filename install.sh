@@ -217,7 +217,7 @@ else
     else
 
 	echo "Setting up avahi-daemon to resolve hostname as IP."
-	sudo apt update && sudo apt-get install -y avahi-daemon
+	sudo apt-get install -y avahi-daemon
  	sudo systemctl enable --now avahi-daemon
 
 	# TODO: check if NetworkManager is installed and set it as the main thing then do this.
