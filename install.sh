@@ -216,6 +216,10 @@ else
         echo "Sudo required to install service! Skipping."
     else
 
+	sudo apt update && sudo apt-get install -y avahi-daemon
+ 	sudo systemctl enable --now avahi-daemon
+
+
 	SERVICE="mlb-led-board-web-interface.service"
 	UNIT_DIR="/etc/systemd/system"
 	UNIT_FILE="$UNIT_DIR/$SERVICE"
@@ -267,10 +271,6 @@ EOF
 
 	echo "Done."
     fi
-
-
-
-
 
 fi
 
