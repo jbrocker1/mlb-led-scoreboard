@@ -1,6 +1,7 @@
 const logEl = document.getElementById('log');
 const listEl = document.getElementById('wifi-list');
 const promptEl = document.getElementById('password-prompt');
+const promptOverlayEl = document.getElementById('popupOverlay');
 const selectedEl = document.getElementById('selected-ssid');
 const pwdInput	 = document.getElementById('password');
 const connectBtn = document.getElementById('connect-btn');
@@ -19,10 +20,11 @@ function buildList(ssids){
 	const btn = document.createElement('button');
 	btn.textContent = ssid;
 	btn.onclick = ()=>{
-	  selectedSSID=ssid;
-	  selectedEl.textContent=`Connect to "${ssid}"`;
-	  promptEl.style.display='block';
-	  pwdInput.focus();
+		selectedSSID=ssid;
+		selectedEl.textContent=`Connect to "${ssid}"`;
+		promptEl.style.display='block';
+		promptOverlayEl.style.display='block';
+		pwdInput.focus();
 	};
 	listEl.appendChild(btn);
   });
@@ -30,19 +32,30 @@ function buildList(ssids){
 
 // Defining buton on press
 connectBtn.onclick = ()=>{
-  const pwd = pwdInput.value.trim();
-  if(!selectedSSID||!pwd) return log('Select SSID + enter password');
-  const payload = {type:'connect', ssid:selectedSSID, password:pwd};
-  ws.send(JSON.stringify(payload));
-  log(`→ asking to connect to "${selectedSSID}"`);
-  promptEl.style.display='none';
-  pwdInput.value='';
+	const pwd = pwdInput.value.trim();
+
+	if(!selectedSSID||!pwd) return log('Select SSID + enter password');
+	const payload = {type:'connect', ssid:selectedSSID, password:pwd};
+	ws.send(JSON.stringify(payload));
+
+	log(`→ asking to connect to "${selectedSSID}"`);
+	promptEl.style.display='none';
+	promptOverlayEl.style.display='none';
+	pwdInput.value='';
 };
 
 // Clears the log
 clearLogBtn.onclick = ()=>{
-	logEl.innerHTML = "";
+	logEl.innerHTML = "Log Cleared";
 };
+
+promptOverlayEl.onclick = ()=> {
+	promptEl.style.display='none';
+	promptOverlayEl.style.display='none';
+	pwdInput.value='';
+}
+
+
 
 
 function connectWebSocket() {

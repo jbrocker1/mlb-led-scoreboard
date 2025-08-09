@@ -7,20 +7,26 @@
   <script type="module" src="app.js"></script>
 </head>
 <body>
-  <h1>Select a Wi-Fi Network</h1>
+	<div id="page_title">
+		<h1>MLB-LED-SCOREBOARD</h1>
+	</div>
+	<div id="select_wifi_title">
+		<h2>Select a WiFi Network</h2>
+	</div>
 
-  <!-- SSID buttons go here -->
-  <div id="wifi-list"></div>
+	<!-- SSID buttons go here -->
+	<div id="wifi-list"></div>
 
-  <!-- Password prompt (hidden until you click an SSID) -->
-  <div id="password-prompt" style="display:none;">
-    <h2 id="selected-ssid"></h2>
-    <input id="password" type="password" placeholder="Enter password" />
-    <button id="connect-btn">Connect</button>
-  </div>
+	<div id="popupOverlay" class="popup-overlay"></div>
+	<!-- Password prompt (hidden until you click an SSID) -->
+	<div id="password-prompt" class="popup-content" style="display:none;">
+		<h3 id="selected-ssid"></h3>
+		<input id="password" type="password" placeholder="Enter password" />
+		<button id="connect-btn">Connect</button>
+	</div>
 
-  <!-- Log for debug / server replies -->
-  <pre id="log"></pre>
-  <button id="clear-log-btn">Clear Log</button>
+<!-- Log for debug / server replies -->
+<pre id="log"></pre>
+<button id="clear-log-btn">Clear Log</button>
 </body>
 </html>
