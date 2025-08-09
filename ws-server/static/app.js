@@ -4,6 +4,7 @@ const promptEl = document.getElementById('password-prompt');
 const selectedEl = document.getElementById('selected-ssid');
 const pwdInput	 = document.getElementById('password');
 const connectBtn = document.getElementById('connect-btn');
+const clearLogBtn = document.getElementById('clear-log-btn');
 let selectedSSID = null;
 let ws;
 let reconnectInterval = 1000;
@@ -36,6 +37,11 @@ connectBtn.onclick = ()=>{
   log(`→ asking to connect to "${selectedSSID}"`);
   promptEl.style.display='none';
   pwdInput.value='';
+};
+
+// Clears the log
+clearLogBtn.onclick = ()=>{
+	logEl.innerHTML = "";
 };
 
 
