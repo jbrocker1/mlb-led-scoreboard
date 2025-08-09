@@ -4,7 +4,11 @@ import websockets
 WS_HOST = '0.0.0.0'
 WS_PORT = 6789
 
+
+prev_connect_result = {}
+
 async def handler(ws):
+    global prev_connect_result
     async for raw in ws:
         try:
             msg = json.loads(raw)
@@ -41,7 +45,21 @@ async def handler(ws):
                 "status": "success" if proc.returncode==0 else "error",
                 "output": proc.stdout if proc.returncode==0 else proc.stderr
             }
+            # Sending response
             await ws.send(json.dumps(resp))
+            # Storing last resp incase someone needs it again.
+            prev_connect_result = resp
+
+            # Deleting connection incase there was an error (should probably modify instead of delete if it exists...)
+            if proc.returncode != 0:
+                subprocess.run(
+                        ['nmcli', 'c', 'delete', ssid],
+                        capture_output=False
+                )
+
+        elif t == "get_prev_connect_result":
+            print("asking to get previous connection result so sending it.")
+            await ws.send(json.dumps(prev_connect_result))
 
         else:
             await ws.send(json.dumps({"error":"unknown_type","received":t}))
