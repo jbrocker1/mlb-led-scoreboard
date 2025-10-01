@@ -329,7 +329,7 @@ After=network.target network-online.target time-sync.target
 ExecStartPre=/bin/sleep/15
 
 [Service]
-Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gio-mapping=adafruit-hat"
+Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gpio-mapping=adafruit-hat"
 WorkingDirectory=$PWD
 ExecStart=$PWD/main.py \$SCOREBOARD_ARGS
 Restart=always
@@ -354,7 +354,7 @@ EOF
 	cat > "$OVERRIDE_FILE" <<EOF
 [Service]
 # Add or override any settings here
-# Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gio-mapping=adafruit-hat"
+# Environment="SCOREBOARD_ARGS=--led-cols=64 --led-rows=32 --led-slowdown-gpio=4 --led-gpio-mapping=adafruit-hat"
 EOF
 	chmod 644 "$OVERRIDE_FILE"
 
