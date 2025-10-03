@@ -3,9 +3,9 @@
 # Redirect output to a logfile
 exec > >(tee -a logs/mlbled.log) 2>&1
 
-SKIP_PYTHON=true
-SKIP_CONFIG=true
-SKIP_MATRIX=true
+SKIP_PYTHON=false
+SKIP_CONFIG=false
+SKIP_MATRIX=false
 NO_SUDO=false
 SKIP_VENV=false
 DRIVER_SHA=master
