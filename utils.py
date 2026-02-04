@@ -24,7 +24,7 @@ def args():
         type=int,
     )
     parser.add_argument(
-        "--led-cols", action="store", help="Panel columns. Typically 32 or 64. (Default: 32)", default=32, type=int
+        "--led-cols", action="store", help="Panel columns. Typically 32 or 64. (Default: 64)", default=64, type=int
     )
     parser.add_argument("--led-chain", action="store", help="Daisy-chained boards. (Default: 1)", default=1, type=int)
     parser.add_argument(
