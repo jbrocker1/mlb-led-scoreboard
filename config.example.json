@@ -53,7 +53,7 @@
 
   "sleep": {
     "enabled": true,
-    "wake_time": "08:00"
+    "wake_time": "08:00",
     "sleep_time": "22:00"
   }
 }
