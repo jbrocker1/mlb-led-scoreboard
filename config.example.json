@@ -49,5 +49,11 @@
 	"pregame_weather": true,
 	"scrolling_speed": 2,
 	"debug": false,
-	"demo_date": false
+	"demo_date": false,
+
+  "sleep": {
+    "enabled": true,
+    "wake_time": "08:00"
+    "sleep_time": "22:00"
+  }
 }

@@ -46,6 +46,23 @@ class MainRenderer:
         else:
             self.__render_gameday()
 
+    def swap_buffers(self):
+
+        if self.data.config.sleep_enabled:
+
+            # Finding minutues from midnight
+            now = time.localtime()
+            now_since_midnight = (now.tm_hour * 60) + now.tm_min
+            wt_since_midnight = (self.data.config.wake_time.tm_hour * 60) + self.data.config.wake_time.tm_min
+            st_since_midnight = (self.data.config.sleep_time.tm_hour * 60) + self.data.config.sleep_time.tm_min
+
+            # If we should be asleep, clear the canvas
+            if (now_since_midnight < wt_since_midnight) or (now_since_midnight  >= st_since_midnight):
+                self.canvas.Clear()
+
+
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
+
     def __render_offday(self, team_offday=True) -> NoReturn:
         if team_offday:
             news = self.data.config.news_ticker_team_offday
@@ -171,7 +188,7 @@ class MainRenderer:
         if self.data.network_issues:
             network.render_network_error(self.canvas, layout, colors)
 
-        self.canvas = self.matrix.SwapOnVSync(self.canvas)
+        self.swap_buffers()
 
     def __draw_news(self, cond: Callable[[], bool]):
         """
@@ -198,7 +215,7 @@ class MainRenderer:
             # Show network issues
             if self.data.network_issues:
                 network.render_network_error(self.canvas, self.data.config.layout, self.data.config.scoreboard_colors)
-            self.canvas = self.matrix.SwapOnVSync(self.canvas)
+            self.swap_buffers()
             time.sleep(self.data.config.scrolling_speed)
 
     def __draw_standings(self, cond: Callable[[], bool]):
@@ -232,7 +249,7 @@ class MainRenderer:
             if self.data.network_issues:
                 network.render_network_error(self.canvas, self.data.config.layout, self.data.config.scoreboard_colors)
 
-            self.canvas = self.matrix.SwapOnVSync(self.canvas)
+            self.swap_buffers()
 
             if self.data.standings.is_postseason():
                 if update % 20 == 0:

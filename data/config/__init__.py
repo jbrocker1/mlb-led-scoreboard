@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 
 from datetime import datetime, timedelta
 
@@ -73,6 +74,13 @@ class Config:
 
         self.debug = json["debug"]
         self.demo_date = json["demo_date"]
+
+        self.sleep_enabled = json["sleep"]["enabled"]
+        # Note, these get modifyed in the check_wake_and_sleep function to time.struct_time objects.
+        self.wake_time = json["sleep"]["wake_time"]
+        self.sleep_time = json["sleep"]["sleep_time"]
+
+
         # Make sure the scrolling speed setting is in range so we don't crash
         try:
             self.scrolling_speed = SCROLLING_SPEEDS[json["scrolling_speed"]]
@@ -103,6 +111,34 @@ class Config:
         self.check_rotate_rates()
         self.check_delay()
         self.check_api_refresh_rate()
+
+        # Checking the sleep and wake to make sure it's what we expect.
+        self.check_wake_and_sleep()
+
+
+    def check_wake_and_sleep(self):
+        # TODO: standardize this somewhere
+        time_format = "%H:%M"
+
+        if(self.sleep_enabled):
+            try:
+                wake = time.strptime(self.wake_time, time_format)
+                sleep = time.strptime(self.sleep_time, time_format)
+
+                if wake > sleep:
+                    debug.warning("Wake time can not come after sleep time."
+                                "Not sleeping inthe mean time.")
+                    raise ValueError("Wake time cannot be greater than sleep time!")
+
+                self.wake_time = wake
+                self.sleep_time = sleep
+
+            except Exception as e:
+                debug.warning("Unable to read sleep times as they are in the config!"
+                              "Not sleeping in the mean time.")
+                self.sleep_enabled = False
+
+
 
     def check_preferred_teams(self):
         if not isinstance(self.preferred_teams, str) and not isinstance(self.preferred_teams, list):
